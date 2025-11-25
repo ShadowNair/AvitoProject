@@ -8,9 +8,9 @@ import(
 )
 
 type Config struct {
-	prUsecase *pr.Usecase  
-	teamUsecase *team.UseCase
-	userUsecase *user.UseCase
+	PrUsecase *pr.Usecase  
+	TeamUsecase *team.UseCase
+	UserUsecase *user.UseCase
 }
 
 func New(configRepo *postgres.Config) *Config {
@@ -18,8 +18,8 @@ func New(configRepo *postgres.Config) *Config {
 	UserUsecase := user.New(configRepo.UserRepo, configRepo.PrRepo)
 	TeamUsecase := team.New(configRepo.TeamRepo)
 	return &Config{
-		prUsecase:   PRUsecase,
-		userUsecase: UserUsecase,
-		teamUsecase: TeamUsecase,
+		PrUsecase:   PRUsecase,
+		UserUsecase: UserUsecase,
+		TeamUsecase: TeamUsecase,
 	}
 }

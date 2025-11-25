@@ -6,6 +6,19 @@ import (
 	modelteam "AvitoProject/internal/models/team"
 )
 
+const(
+	sqlTextCreateTeam1 = `INSERT INTO teams (name) VALUES ($1) ON CONFLICT DO NOTHING`
+	sqlTextCreateTeam2 = `
+			INSERT INTO users (id, username, team_name, is_active)
+			VALUES ($1, $2, $3, $4)
+			ON CONFLICT (id) DO UPDATE SET
+				username = EXCLUDED.username,
+				team_name = EXCLUDED.team_name,
+				is_active = EXCLUDED.is_active
+		`
+		sqlTextGetTeam = `SELECT id, username, is_active FROM users WHERE team_name = $1`
+)
+
 type DB struct{
 	sql *sql.DB
 }
@@ -18,22 +31,15 @@ func New(sql *sql.DB) *DB{
 
 func (s *DB) CreateTeam(name string, members []modeluser.User) error {
 	tx, _ := s.sql.Begin()
-	_, _ = tx.Exec(`INSERT INTO teams (name) VALUES ($1) ON CONFLICT DO NOTHING`, name)
+	_, _ = tx.Exec(sqlTextCreateTeam1, name)
 	for _, m := range members {
-		_, _ = tx.Exec(`
-			INSERT INTO users (id, username, team_name, is_active)
-			VALUES ($1, $2, $3, $4)
-			ON CONFLICT (id) DO UPDATE SET
-				username = EXCLUDED.username,
-				team_name = EXCLUDED.team_name,
-				is_active = EXCLUDED.is_active
-		`, m.ID, m.Username, name, m.IsActive)
+		_, _ = tx.Exec(sqlTextCreateTeam2, m.ID, m.Username, name, m.IsActive)
 	}
 	return tx.Commit()
 }
 
 func (s *DB) GetTeam(name string) (*modelteam.Team, error) {
-	rows, err := s.sql.Query(`SELECT id, username, is_active FROM users WHERE team_name = $1`, name)
+	rows, err := s.sql.Query(sqlTextGetTeam, name)
 	if err != nil {
 		return nil, err
 	}
