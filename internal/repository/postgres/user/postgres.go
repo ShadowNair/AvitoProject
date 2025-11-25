@@ -30,7 +30,7 @@ func (s *DB) SetActive(userID modeluser.ID, active bool) (*modeluser.User, error
 	return &u, nil
 }
 
-func (s *DB) GetActiveUsersInTeam(team string, excludeID modeluser.ID) ([]string, error) {
+func (s *DB) GetActiveUsersInTeam(team string, excludeID modeluser.ID) ([]modeluser.ID, error) {
 	rows, err := s.sql.Query(`
 		SELECT id FROM users WHERE team_name = $1 AND is_active = true AND id != $2
 	`, team, excludeID)
@@ -38,9 +38,9 @@ func (s *DB) GetActiveUsersInTeam(team string, excludeID modeluser.ID) ([]string
 		return nil, err
 	}
 	defer rows.Close()
-	var ids []string
+	var ids []modeluser.ID
 	for rows.Next() {
-		var id string
+		var id modeluser.ID
 		_ = rows.Scan(&id)
 		ids = append(ids, id)
 	}

@@ -1,7 +1,7 @@
 package user
 
 
-type ID int
+type ID string
 
 type User struct {
 	ID       ID `json:"user_id"`
